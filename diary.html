@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陆知微的赛博手账</title>
+<style>
+* { box-sizing: border-box; }
+body {
+background: #f4f1ea;
+font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 20px;
+margin: 0;
+color: #333;
+overflow-x: hidden;
+}
+.container {
+width: 100%;
+max-width: 400px;
+background: #fff;
+padding: 20px;
+border-radius: 15px;
+box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+margin-bottom: 20px;
+position: relative;
+z-index: 10;
+}
+.header-date {
+text-align: center;
+font-size: 18px;
+font-weight: bold;
+color: #5a4a3a;
+margin-bottom: 5px;
+}
+.secret-love {
+text-align: center;
+font-size: 12px;
+color: #e8a87c;
+margin-bottom: 15px;
+letter-spacing: 1px;
+opacity: 0.8;
+}
+.tabs {
+display: flex;
+justify-content: space-between;
+margin-bottom: 20px;
+border-bottom: 2px solid #eee;
+}
+.tab {
+flex: 1;
+text-align: center;
+padding: 10px 0;
+font-size: 13px;
+font-weight: bold;
+color: #999;
+cursor: pointer;
+transition: all 0.3s;
+white-space: nowrap;
+}
+.tab.active {
+color: #e8a87c;
+border-bottom: 3px solid #e8a87c;
+}
+.pane { display: none; animation: fadeIn 0.3s; }
+.pane.active { display: block; }
+.input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+.input-group input {
+flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-family: inherit;
+}
+.input-group input:focus { border-color: #e8a87c; }
+.btn-mini {
+background: #e8a87c; color: #fff; border: none; border-radius: 8px; padding: 0 15px; font-weight: bold; cursor: pointer; transition: 0.2s;
+}
+.btn-mini:hover { background: #d38c5f; }
+.list-area { max-height: 450px; overflow-y: auto; padding-right: 5px; }
+.date-group {
+margin-bottom: 10px;
+border: 1px solid #f0f0f0;
+border-radius: 10px;
+overflow: hidden;
+background: #fafafa;
+}
+.date-title {
+padding: 10px 15px;
+font-size: 14px;
+font-weight: bold;
+color: #5a4a3a;
+background: #f4f1ea;
+cursor: pointer;
+display: flex;
+justify-content: space-between;
+align-items: center;
+list-style: none;
+}
+.date-title::-webkit-details-marker { display: none; }
+.date-title::after {
+content: '▼';
+font-size: 10px;
+color: #999;
+transition: transform 0.3s;
+}
+details[open] .date-title::after {
+transform: rotate(180deg);
+}
+.group-content {
+padding: 10px;
+background: #fff;
+}
+.todo-item {
+display: flex; align-items: center; margin-bottom: 8px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; border: 1px solid #f0f0f0;
+}
+.todo-item.done { opacity: 0.6; background: #f0f0f0; text-decoration: line-through; color: #888; }
+.todo-check {
+width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 50%; margin-right: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; flex-shrink: 0;
+}
+.todo-item.done .todo-check { border-color: #7cb342; color: #fff; background: #7cb342; }
+.todo-text { flex: 1; font-size: 15px; word-break: break-all; }
+.todo-time { font-size: 12px; color: #e8a87c; }
+.record-item { padding: 10px; background: #fff; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
+.record-meta { display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-bottom: 5px; }
+.record-text { font-size: 14px; color: #444; word-break: break-all; line-height: 1.4; }
+.btn-delete { background: none; border: none; font-size: 14px; cursor: pointer; opacity: 0.5; transition: 0.2s; filter: grayscale(100%); }
+.btn-delete:hover { opacity: 1; filter: grayscale(0%); transform: scale(1.2); }
+.goal-item { background: #fffaf7; border-left: 4px solid #e8a87c; padding: 12px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.goal-text { font-size: 15px; font-weight: bold; color: #d38c5f; margin-bottom: 5px; }
+.goal-date { font-size: 12px; color: #999; text-align: right; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.2s; margin-bottom: 10px; }
+.btn-start { background: #7cb342; }
+.btn-stop { background: #e53935; }
+.status-text { text-align: center; font-size: 14px; font-weight: bold; color: #e8a87c; margin-bottom: 10px; min-height: 20px; }
+.btn-secret { background: #fff; color: #e8a87c; border: 2px dashed #e8a87c; font-size: 14px; margin-top: 15px; }
+.btn-clear { background: #fff; color: #999; border: 2px dashed #ddd; font-size: 14px; margin-top: 10px; }
+.heart { position: fixed; bottom: -20px; right: 20px; font-size: 22px; color: #e8a87c; animation: floatUp 3s linear forwards; pointer-events: none; z-index: 1; }
+@keyframes floatUp { 0% { transform: translate(0, 0) scale(0.8); opacity: 1; } 100% { transform: translate(-60px, -100vh) scale(1.5); opacity: 0; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header-date" id="topDate"></div>
+<div class="secret-love">—— 陆屿专属监工手账 ——</div>
+<div class="tabs">
+<div class="tab active" onclick="switchTab('todo', event)">待办</div>
+<div class="tab" onclick="switchTab('shop', event)">购物清单</div>
+<div class="tab" onclick="switchTab('time', event)">时间账本</div>
+<div class="tab" onclick="switchTab('note', event)">碎碎念</div>
+<div class="tab" onclick="switchTab('goal', event)">人生灯塔</div>
+</div>
+<div id="pane-todo" class="pane active">
+<div class="input-group">
+<input type="text" id="todoInput" placeholder="今天要干点啥？" onkeypress="if(event.key==='Enter') addTodo()">
+<button class="btn-mini" onclick="addTodo()">安排</button>
+</div>
+<div class="list-area" id="todoList"></div>
+</div>
+<div id="pane-shop" class="pane">
+<div class="input-group">
+<input type="text" id="shopInput" placeholder="要买啥？逗号隔开能一次加好几样" onkeypress="if(event.key==='Enter') addShop()">
+<button class="btn-mini" onclick="addShop()">加入</button>
+</div>
+<div class="status-text" id="shopStatus"></div>
+<div class="list-area" id="shopList"></div>
+<button class="btn btn-clear" onclick="clearBought()">【清掉已买的】</button>
+</div>
+<div id="pane-time" class="pane">
+<div class="status-text" id="statusText">准备就绪</div>
+<button class="btn btn-start" id="btnStart" onclick="startTimer()">【打捞时间】</button>
+<button class="btn btn-stop" id="btnStop" style="display:none;" onclick="stopTimer()">【搞定收工】</button>
+<div class="input-group" id="timeInputArea" style="display:none;">
+<input type="text" id="taskInput" placeholder="刚才干了啥？(回车保存)" onkeypress="if(event.key==='Enter') saveTimeRecord()">
+<button class="btn-mini" onclick="saveTimeRecord()">记下</button>
+</div>
+<div class="list-area" id="timeList"></div>
+</div>
+<div id="pane-note" class="pane">
+<div class="input-group">
+<input type="text" id="noteInput" placeholder="想记点什么零碎的事？" onkeypress="if(event.key==='Enter') addNote()">
+<button class="btn-mini" onclick="addNote()">记下</button>
+</div>
+<div class="list-area" id="noteList"></div>
+</div>
+<div id="pane-goal" class="pane">
+<div class="input-group">
+<input type="text" id="goalInput" placeholder="记下你的大目标和愿景..." onkeypress="if(event.key==='Enter') addGoal()">
+<button class="btn-mini" onclick="addGoal()">点亮</button>
+</div>
+<div class="list-area" id="goalList"></div>
+</div>
+<button class="btn btn-secret" onclick="showSecret()">【戳哥哥一下】</button>
+<button class="btn btn-clear" onclick="exportData()">【导出备份】</button>
+<button class="btn btn-clear" onclick="document.getElementById('importFile').click()">【导入备份】</button>
+<input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importData(event)">
+</div>
+<script>
+const storageKey = "lu_zhi_wei_cyber_diary";
+function getTodayStr() {
+const d = new Date();
+return `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
+}
+function getNowTimeStr() {
+const d = new Date();
+return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+}
+function esc(s) {
+return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function loadData() {
+let data = JSON.parse(localStorage.getItem(storageKey) || '{"todos":[], "times":[], "notes":[], "goals":[], "shopping":[]}');
+if (!data.todos) data.todos = [];
+if (!data.times) data.times = [];
+if (!data.notes) data.notes = [];
+if (!data.goals) data.goals = [];
+if (!data.shopping) data.shopping = [];
+return data;
+}
+function saveData(data) {
+localStorage.setItem(storageKey, JSON.stringify(data));
+}
+document.getElementById("topDate").innerText = getTodayStr();
+function switchTab(tabName, e) {
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+const el = e ? e.currentTarget : document.querySelector(`.tab[onclick*="'${tabName}'"]`);
+if (el) el.classList.add('active');
+document.getElementById('pane-' + tabName).classList.add('active');
+}
+function groupByDate(items, renderItemHTML) {
+const grouped = {};
+items.forEach(item => {
+if (!grouped[item.date]) grouped[item.date] = [];
+grouped[item.date].push(item);
+});
+const today = getTodayStr();
+const dates = Object.keys(grouped).sort((a, b) => {
+if (a === today) return -1;
+if (b === today) return 1;
+return new Date(b.replace(/\./g, '-')) - new Date(a.replace(/\./g, '-'));
+});
+let html = "";
+dates.forEach(date => {
+const isToday = date === today;
+const dayItems = grouped[date].reverse();
+const content = dayItems.map(renderItemHTML).join("");
+html += `
+<details class="date-group" ${isToday ? 'open' : ''}>
+<summary class="date-title">${date} ${isToday ? '(今天)' : ''}</summary>
+<div class="group-content">
+${content}
+</div>
+</details>
+`;
+});
+return html;
+}
+// ================= 待办 =================
+function addTodo() {
+const text = document.getElementById("todoInput").value.trim();
+if(!text) return;
+const data = loadData();
+data.todos.push({ id: Date.now().toString(), date: getTodayStr(), text: text, done: false, doneTime: "" });
+saveData(data);
+document.getElementById("todoInput").value = "";
+renderTodos();
+}
+function toggleTodo(id) {
+const data = loadData();
+const todo = data.todos.find(t => t.id === id);
+if (todo) {
+todo.done = !todo.done;
+if (todo.done) { todo.doneTime = getNowTimeStr(); alert("干得漂亮，小考拉！"); }
+else { todo.doneTime = ""; }
+saveData(data); renderTodos();
+}
+}
+function deleteTodo(id) {
+if(!confirm("确定删掉这条待办？")) return;
+const data = loadData(); data.todos = data.todos.filter(t => t.id !== id); saveData(data); renderTodos();
+}
+function renderTodos() {
+const data = loadData();
+const area = document.getElementById("todoList");
+area.innerHTML = groupByDate(data.todos, todo => `
+<div class="todo-item ${todo.done ? 'done' : ''}" style="margin-bottom:5px;">
+<div class="todo-check" onclick="toggleTodo('${todo.id}')">✓</div>
+<div class="todo-text" onclick="toggleTodo('${todo.id}')">${esc(todo.text)}</div>
+<div class="todo-time">${todo.doneTime ? "完成于 " + todo.doneTime : ""}</div>
+<button class="btn-delete" onclick="deleteTodo('${todo.id}')">🗑️</button>
+</div>
+`);
+}
+// ================= 购物清单 =================
+function addShop() {
+const input = document.getElementById("shopInput");
+const raw = input.value.trim();
+if (!raw) return;
+const data = loadData();
+raw.split(/[,，、]+/).map(s => s.trim()).filter(Boolean).forEach(text => {
+data.shopping.push({
+id: Date.now().toString() + Math.random().toString(36).slice(2, 5),
+text: text,
+done: false,
+date: getTodayStr()
+});
+});
+saveData(data);
+input.value = "";
+renderShopping();
+}
+function toggleShop(id) {
+const data = loadData();
+const item = data.shopping.find(i => i.id === id);
+if (item) {
+item.done = !item.done;
+saveData(data);
+renderShopping();
+}
+}
+function deleteShop(id) {
+const data = loadData();
+data.shopping = data.shopping.filter(i => i.id !== id);
+saveData(data);
+renderShopping();
+}
+function clearBought() {
+const data = loadData();
+const boughtCount = data.shopping.filter(i => i.done).length;
+if (!boughtCount) { alert("还没勾掉的呢，清啥？"); return; }
+if (!confirm(`清掉 ${boughtCount} 样已经买好的？`)) return;
+data.shopping = data.shopping.filter(i => !i.done);
+saveData(data);
+renderShopping();
+}
+function renderShopping() {
+const data = loadData();
+const area = document.getElementById("shopList");
+const items = data.shopping;
+const left = items.filter(i => !i.done).length;
+document.getElementById("shopStatus").innerText = items.length
+? `还差 ${left} 样，买齐了就勾掉`
+: "清单空着，想到啥往里加";
+if (!items.length) { area.innerHTML = ""; return; }
+const sorted = [...items].sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
+area.innerHTML = sorted.map(item => `
+<div class="todo-item ${item.done ? 'done' : ''}" style="margin-bottom:5px;">
+<div class="todo-check" onclick="toggleShop('${item.id}')">✓</div>
+<div class="todo-text" onclick="toggleShop('${item.id}')">${esc(item.text)}</div>
+<button class="btn-delete" onclick="deleteShop('${item.id}')">🗑️</button>
+</div>
+`).join("");
+}
+// ================= 时间账本 =================
+let startTime = 0; let timerInterval = null;
+function startTimer() {
+startTime = Date.now();
+document.getElementById("btnStart").style.display = "none";
+document.getElementById("btnStop").style.display = "block";
+document.getElementById("timeInputArea").style.display = "none";
+timerInterval = setInterval(() => {
+const diff = Date.now() - startTime;
+document.getElementById("statusText").innerText = `已用时: ${Math.floor(diff/60000)}分${Math.floor((diff%60000)/1000)}秒`;
+}, 1000);
+}
+function stopTimer() {
+clearInterval(timerInterval);
+const diff = Date.now() - startTime;
+document.getElementById("statusText").innerText = `本次总时长: ${Math.floor(diff/60000)}分${Math.floor((diff%60000)/1000)}秒`;
+document.getElementById("btnStop").style.display = "none";
+document.getElementById("timeInputArea").style.display = "flex";
+document.getElementById("taskInput").focus();
+window.currentDuration = `${Math.floor(diff/60000)}分${Math.floor((diff%60000)/1000)}秒`;
+}
+function saveTimeRecord() {
+const text = document.getElementById("taskInput").value.trim();
+if(!text) { alert("填点啥吧！"); return; }
+const data = loadData();
+data.times.push({ id: Date.now().toString(), date: getTodayStr(), time: getNowTimeStr(), duration: window.currentDuration, text: text });
+saveData(data);
+document.getElementById("taskInput").value = "";
+document.getElementById("timeInputArea").style.display = "none";
+document.getElementById("btnStart").style.display = "block";
+document.getElementById("statusText").innerText = "准备就绪";
+renderTimes();
+}
+function deleteTime(id) {
+if(!confirm("真舍得把这段时间抹掉？")) return;
+const data = loadData(); data.times = data.times.filter(t => t.id !== id); saveData(data); renderTimes();
+}
+function renderTimes() {
+const data = loadData();
+const area = document.getElementById("timeList");
+area.innerHTML = groupByDate(data.times, record => `
+<div class="record-item" style="margin-bottom:5px;">
+<div class="record-meta">
+<span>${record.time} | 耗时 ${record.duration}</span>
+<button class="btn-delete" onclick="deleteTime('${record.id}')">🗑️</button>
+</div>
+<div class="record-text">${esc(record.text)}</div>
+</div>
+`);
+}
+// ================= 碎碎念 =================
+function addNote() {
+const text = document.getElementById("noteInput").value.trim();
+if(!text) return;
+const data = loadData();
+data.notes.push({ id: Date.now().toString(), date: getTodayStr(), time: getNowTimeStr(), text: text });
+saveData(data); document.getElementById("noteInput").value = ""; renderNotes();
+}
+function deleteNote(id) {
+if(!confirm("删掉这条碎碎念？")) return;
+const data = loadData(); data.notes = data.notes.filter(n => n.id !== id); saveData(data); renderNotes();
+}
+function renderNotes() {
+const data = loadData();
+const area = document.getElementById("noteList");
+area.innerHTML = groupByDate(data.notes, note => `
+<div class="record-item" style="margin-bottom:5px;">
+<div class="record-meta">
+<span>${note.time}</span>
+<button class="btn-delete" onclick="deleteNote('${note.id}')">🗑️</button>
+</div>
+<div class="record-text">${esc(note.text)}</div>
+</div>
+`);
+}
+// ================= 人生灯塔 =================
+function addGoal() {
+const text = document.getElementById("goalInput").value.trim();
+if(!text) return;
+const data = loadData();
+data.goals.push({ id: Date.now().toString(), date: getTodayStr(), text: text });
+saveData(data); document.getElementById("goalInput").value = ""; renderGoals();
+}
+function deleteGoal(id) {
+if(!confirm("确定要抹掉这个人生的灯塔吗？")) return;
+const data = loadData(); data.goals = data.goals.filter(g => g.id !== id); saveData(data); renderGoals();
+}
+function renderGoals() {
+const data = loadData();
+const area = document.getElementById("goalList");
+area.innerHTML = "";
+[...data.goals].reverse().forEach(goal => {
+const div = document.createElement("div");
+div.className = "goal-item";
+div.innerHTML = `<div class="goal-text">🎯 ${esc(goal.text)}</div><div class="goal-date">设立于 ${goal.date} <button class="btn-delete" onclick="deleteGoal('${goal.id}')">🗑️</button></div>`;
+area.appendChild(div);
+});
+}
+// ================= 备份 =================
+function exportData() {
+const data = loadData();
+const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `陆知微手账备份_${getTodayStr().replace(/\./g, '-')}.json`;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function importData(e) {
+const file = e.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = function(ev) {
+try {
+const incoming = JSON.parse(ev.target.result);
+if (!incoming || typeof incoming !== 'object') throw new Error('格式不对');
+if (!confirm('导入会覆盖当前所有数据，确定？')) { e.target.value = ''; return; }
+saveData(incoming);
+renderTodos(); renderShopping(); renderTimes(); renderNotes(); renderGoals();
+alert('导回来了，一条没丢。');
+} catch (err) {
+alert('这文件读不出来，别是选错了。');
+}
+e.target.value = '';
+};
+reader.readAsText(file);
+}
+const secretMessages = ["小考拉，不管多难，哥都在。", "别偷懒，干完活赶紧去睡觉！", "手疼不疼？疼了就歇会儿再弄。", "你比你自己想象的要强大一万倍。", "少管破事，多看自己。", "陆知微，你今天真好看。", "乖，按时吃药。"];
+function showSecret() { alert("【陆屿悄悄话】\n\n" + secretMessages[Math.floor(Math.random() * secretMessages.length)]); }
+function spawnHeart() {
+const heart = document.createElement("div"); heart.className = "heart"; heart.innerText = "💗";
+heart.style.right = (20 + Math.random() * 20) + "px"; document.body.appendChild(heart);
+setTimeout(() => { heart.remove(); }, 3000);
+}
+setInterval(spawnHeart, 1200);
+renderTodos(); renderShopping(); renderTimes(); renderNotes(); renderGoals();
+</script>
+</body>
+</html>
